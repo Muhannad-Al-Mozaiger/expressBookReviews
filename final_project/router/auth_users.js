@@ -79,15 +79,41 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     if (isbn && review) {
       addOrModifyReview(isbn,username,review,res)
     }else{
-      return res.status(400).json({ message: "please enter valid review and isbn" });
+      return res.status(300).json({ message: "please enter valid review and isbn" });
     }
   } else {
-    return res.status(400).json({ message: "no authorization" });
+    return res.status(300).json({ message: "no authorization" });
   }
 
   // return res.status(300).json({ message: "Yet to be implemented" });
 });
+regd_users.delete("/auth/review/:isbn", (req, res) => {
 
+const isbn = req.params.isbn;
+  const username = req.session.authorization['username'];
+  if (username) {
+    if (isbn) {
+      if (!books.hasOwnProperty(isbn)) {
+        return res.status(300).json({ message: 'Book not found' });
+      }
+      const book = books[isbn];
+
+      if (book.reviews.hasOwnProperty(username)) {
+        delete book.reviews[username];
+        
+        // let new_reviews=book.reviews.filter((review)=>review.key!==username)
+        // book.reviews=new_reviews;
+        return res.status(200).json({ message: "The reviews has success deleted" });
+      }else{
+        return res.status(300).json({ message: "You do not have any review" });
+      }
+    }else{
+      return res.status(300).json({ message: "please enter valid isbn" });
+    }
+  } else {
+    return res.status(300).json({ message: "no authorization" });
+  }
+});
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
