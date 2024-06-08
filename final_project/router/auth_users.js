@@ -46,10 +46,46 @@ regd_users.post("/login", (req, res) => {
   // return res.status(300).json({message: "Yet to be implemented"});
 });
 
+// Function to add or modify a book review
+const addOrModifyReview = (bookId, username, review,res) => {
+  // Check if the book exists
+  if (!books.hasOwnProperty(bookId)) {
+    return res.status(300).json({ message: 'Book not found' });
+  }
+
+  // Get the book object
+  const book = books[bookId];
+
+  let message;
+  // Check if the user has already posted a review for this book
+  if (book.reviews.hasOwnProperty(username)) {
+    // Modify the existing review
+
+    message = 'Review modified';
+  } else {
+    // Add a new review
+    message = 'Review added';
+  }
+  book.reviews[username] = review;
+  return res.status(200).json({ message: message });
+}
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  return res.status(300).json({ message: "Yet to be implemented" });
+  const review = req.query.review;
+  const isbn = req.params.isbn;
+  const username = req.session.authorization['username'];
+  if (username) {
+    if (isbn && review) {
+      addOrModifyReview(isbn,username,review,res)
+    }else{
+      return res.status(400).json({ message: "please enter valid review and isbn" });
+    }
+  } else {
+    return res.status(400).json({ message: "no authorization" });
+  }
+
+  // return res.status(300).json({ message: "Yet to be implemented" });
 });
 
 module.exports.authenticated = regd_users;
